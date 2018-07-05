@@ -247,7 +247,6 @@ class HashClient(object):
             client = self._get_client(key)
 
             if client is None:
-                end.append(False)
                 continue
 
             if client.server not in client_batches:
