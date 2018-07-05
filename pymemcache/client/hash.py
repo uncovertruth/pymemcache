@@ -263,9 +263,10 @@ class HashClient(object):
                 client,
                 client.set_many, False, *new_args, **kwargs
             )
-            end.append(result)
+            if type(result) is list:
+                end.append(result)
 
-        return all(end)
+        return [j for i in end for j in i]
 
     set_multi = set_many
 

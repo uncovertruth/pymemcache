@@ -317,9 +317,12 @@ class Client(object):
 
         # TODO: make this more performant by sending all the values first, then
         # waiting for all the responses.
+        failed = []
         for key, value in six.iteritems(values):
-            self.set(key, value, expire, noreply)
-        return True
+            r = self.set(key, value, expire, noreply)
+            if not r:
+                failed.append(key)
+        return failed
 
     set_multi = set_many
 
