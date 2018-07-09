@@ -260,10 +260,9 @@ class HashClient(object):
             new_args.insert(0, values)
             result = self._safely_run_func(
                 client,
-                client.set_many, False, *new_args, **kwargs
+                client.set_many, values.keys(), *new_args, **kwargs
             )
-            if type(result) is list:
-                end.append(result)
+            end.append(result)
 
         return [j for i in end for j in i]
 

@@ -309,14 +309,9 @@ class Client(object):
                    self.default_noreply).
 
         Returns:
-          If no exception is raised, always returns True. Otherwise all, some
-          or none of the keys have been successfully set. If noreply is True
-          then a successful return does not guarantee that any keys were
-          successfully set (just that the keys were successfully sent).
+          List of keys which  failed to be stored [ memcache out of memory, etc. ].
         """
 
-        # TODO: make this more performant by sending all the values first, then
-        # waiting for all the responses.
         failed = []
         for key, value in six.iteritems(values):
             r = self.set(key, value, expire, noreply)
