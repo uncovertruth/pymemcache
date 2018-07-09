@@ -156,13 +156,13 @@ class ClientTestMixin(object):
     def test_set_many_success(self):
         client = self.make_client([b'STORED\r\n'])
         result = client.set_many({b'key': b'value'}, noreply=False)
-        assert result is True
+        assert result == []
 
     def test_set_multi_success(self):
         # Should just map to set_many
         client = self.make_client([b'STORED\r\n'])
         result = client.set_multi({b'key': b'value'}, noreply=False)
-        assert result is True
+        assert result == []
 
     def test_add_stored(self):
         client = self.make_client([b'STORED\r', b'\n'])
@@ -602,7 +602,7 @@ class TestClient(ClientTestMixin, unittest.TestCase):
     def test_set_many_socket_handling(self):
         client = self.make_client([b'STORED\r\n'])
         result = client.set_many({b'key': b'value'}, noreply=False)
-        assert result is True
+        assert result == []
         assert client.sock.closed is False
         assert len(client.sock.send_bufs) == 1
 
@@ -854,6 +854,16 @@ class TestPooledClient(ClientTestMixin, unittest.TestCase):
         result = getattr(client, cmd)(*args)
         assert result is True
 
+    def _default_noreply_false_and_result(self, cmd, args, response, result):
+        client = self.make_client(response, default_noreply=False)
+        r = getattr(client, cmd)(*args)
+        assert r == result
+
+    def _default_noreply_true_and_result(self, cmd, args, response, result):
+        client = self.make_client(response, default_noreply=True)
+        r = getattr(client, cmd)(*args)
+        assert r == result
+
     def test_default_noreply_set(self):
         with pytest.raises(MemcacheUnknownError):
             self._default_noreply_false(
@@ -863,10 +873,10 @@ class TestPooledClient(ClientTestMixin, unittest.TestCase):
 
     def test_default_noreply_set_many(self):
         with pytest.raises(MemcacheUnknownError):
-            self._default_noreply_false(
-                'set_many', ({b'key': b'value'},), [b'NOT_STORED\r\n'])
-        self._default_noreply_true(
-            'set_many', ({b'key': b'value'},), [b'NOT_STORED\r\n'])
+            self._default_noreply_false_and_result(
+                'set_many', ({b'key': b'value'},), [b'NOT_STORED\r\n'], [b'key'])
+        self._default_noreply_true_and_result(
+            'set_many', ({b'key': b'value'},), [b'NOT_STORED\r\n'], [])
 
     def test_default_noreply_add(self):
         self._default_noreply_false(
